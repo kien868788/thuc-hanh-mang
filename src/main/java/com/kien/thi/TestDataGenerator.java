@@ -21,18 +21,21 @@ public class TestDataGenerator {
         //header
         Row headerRowOne = sheetOne.createRow(rowNumber++);
         Cell sttHeaderCell = headerRowOne.createCell(0);
-        sttHeaderCell.setCellValue("STT");
+        sttHeaderCell.setCellValue("TT");
 
-        Cell nameHeaderCell = headerRowOne.createCell(1);
+        Cell idHeaderCell = headerRowOne.createCell(1);
+        idHeaderCell.setCellValue("Số thẻ");
+
+        Cell nameHeaderCell = headerRowOne.createCell(2);
         nameHeaderCell.setCellValue("Họ và tên");
 
-        Cell bithDateHeaderCell = headerRowOne.createCell(2);
-        bithDateHeaderCell.setCellValue(LocalDate.now().toString());
+        Cell birthDate = headerRowOne.createCell(3);
+        birthDate.setCellValue("Ngày sinh");
 
-        Cell workingUnitHeaderCell = headerRowOne.createCell(3);
+        Cell workingUnitHeaderCell = headerRowOne.createCell(4);
         workingUnitHeaderCell.setCellValue("Đơn vị công tác");
 
-        Cell noteHeaderCell = headerRowOne.createCell(4);
+        Cell noteHeaderCell = headerRowOne.createCell(5);
         noteHeaderCell.setCellValue("Note");
 
         for (int i = 1; i <= ONE_MILLION + 48575; i++) {
@@ -40,16 +43,19 @@ public class TestDataGenerator {
             Cell sttCell = row.createCell(0);
             sttCell.setCellValue(i);
 
-            Cell nameCell = row.createCell(1);
+            Cell idCell = row.createCell(1);
+            idCell.setCellValue(100+i);
+
+            Cell nameCell = row.createCell(2);
             nameCell.setCellValue("Trần văn " + i);
 
-            Cell bithDateCell = row.createCell(2);
+            Cell bithDateCell = row.createCell(3);
             bithDateCell.setCellValue(LocalDate.now().toString());
 
-            Cell workingUnitCell = row.createCell(3);
-            workingUnitCell.setCellValue("Khoa CNTT");
+            Cell workingUnitCell = row.createCell(4);
+            workingUnitCell.setCellValue("Khoa CNTT" + i);
 
-            Cell noteCell = row.createCell(4);
+            Cell noteCell = row.createCell(5);
             noteCell.setCellValue("note");
         }
 
@@ -77,7 +83,7 @@ public class TestDataGenerator {
             nameCellTwo.setCellValue("A" + i);
 
             Cell locationCellTwo = row.createCell(3);
-            locationCellTwo.setCellValue("khu H");
+            locationCellTwo.setCellValue("H" + i);
 
             Cell notCellTwo = row.createCell(4);
             notCellTwo.setCellValue("note");

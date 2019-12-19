@@ -3,6 +3,7 @@ package com.kien.thi.server;
 import com.monitorjbl.xlsx.StreamingReader;
 import lombok.Data;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.*;
@@ -17,11 +18,14 @@ import java.util.stream.IntStream;
 public class ClientHandler extends Thread {
     public final int HEADER_ROW= 0;
     public final int EXAMINER_STT_COLUMN = 0;
-    public final int EXAMINER_NAME_COLUMN = 1;
-    public final int EXAMINER_NOTE_COLUMN = 4;
+    public final int EXAMINER_ID_COLUMN = 1;
+    public final int EXAMINER_NAME_COLUMN = 2;
+    public final int EXAMINER_BIRTHDAY_COLUMN = 3;
+    public final int EXAMINER_UNIT_COLUMN = 4;
+    public final int EXAMINER_NOTE_COLUMN = 5;
+
     public final int ROOM_STT_COLUMN = 0;
     public final int ROOM_NAME_COLUMN = 1;
-
     DataInputStream dis;
     DataOutputStream dos;
 
@@ -103,13 +107,25 @@ public class ClientHandler extends Thread {
     }
 
     private byte[] generateExcel() {
-        int rowNumber = 0;
         int stt = 1;
         Workbook workbook = new SXSSFWorkbook();
         Sheet sheet = workbook.createSheet();
+
+        Row firstRow = sheet.createRow(0);
+
+        Cell firstCell = firstRow.createCell(3);
+        firstCell.setCellValue("  Cộng hòa xã hội chủ nghĩa Việt Nam " + "\n" +
+                "    Độc Lập - Tự Do - Hạnh Phúc    " + "\n" +
+                "DANH SÁCH PHÂN CÔNG COI THI"
+        );
+
+        sheet.addMergedRegion(new CellRangeAddress(0, 2, 3, 5));
+
+
+        int rowNumber = 5;
         Row header = sheet.createRow(rowNumber++);
         int headerColumnNumber = 0;
-        for (String str : Arrays.asList("STT", "Họ và tên", "Phòng thi", "Chức năng", "Chú thích")) {
+        for (String str : Arrays.asList("STT", "Số thẻ", "Họ và tên", "Ngày sinh", "Đơn vị công tác", "Phòng thi", "Chức vụ", "Ghi chú")) {
             Cell cell = header.createCell(headerColumnNumber++);
             cell.setCellValue(str);
         }
@@ -122,8 +138,17 @@ public class ClientHandler extends Thread {
             Cell sttCell = row.createCell(columnNumber++);
             sttCell.setCellValue(stt++);
 
+            Cell idCell = row.createCell(columnNumber++);
+            idCell.setCellValue(examiner.getId());
+
             Cell nameCell = row.createCell(columnNumber++);
             nameCell.setCellValue(examiner.getName());
+
+            Cell birthDayCell = row.createCell(columnNumber++);
+            birthDayCell.setCellValue(examiner.getBirthDate());
+
+            Cell unitCell = row.createCell(columnNumber++);
+            unitCell.setCellValue(examiner.getUnit());
 
             Cell roomCell = row.createCell(columnNumber++);
             roomCell.setCellValue(examiner.getRoom().getName());
@@ -142,11 +167,21 @@ public class ClientHandler extends Thread {
             Cell sttCell = row.createCell(columnNumber++);
             sttCell.setCellValue(stt++);
 
+            Cell idCell = row.createCell(columnNumber++);
+            idCell.setCellValue(examiner.getId());
+
             Cell nameCell = row.createCell(columnNumber++);
             nameCell.setCellValue(examiner.getName());
 
+            Cell birthDayCell = row.createCell(columnNumber++);
+            birthDayCell.setCellValue(examiner.getBirthDate());
+
+            Cell unitCell = row.createCell(columnNumber++);
+            unitCell.setCellValue(examiner.getUnit());
+
             Cell roomCell = row.createCell(columnNumber++);
             roomCell.setCellValue(examiner.getRoom().getName());
+
 
             Cell roleCell = row.createCell(columnNumber++);
             roleCell.setCellValue("Giám thị 2");
@@ -162,8 +197,17 @@ public class ClientHandler extends Thread {
             Cell sttCell = row.createCell(columnNumber++);
             sttCell.setCellValue(stt++);
 
+            Cell idCell = row.createCell(columnNumber++);
+            idCell.setCellValue(examiner.getId());
+
             Cell nameCell = row.createCell(columnNumber++);
             nameCell.setCellValue(examiner.getName());
+
+            Cell birthDayCell = row.createCell(columnNumber++);
+            birthDayCell.setCellValue(examiner.getBirthDate());
+
+            Cell unitCell = row.createCell(columnNumber++);
+            unitCell.setCellValue(examiner.getUnit());
 
             Cell roomCell = row.createCell(columnNumber++);
             roomCell.setCellValue("");
@@ -191,7 +235,7 @@ public class ClientHandler extends Thread {
                 .limit(totalRoom)
                 .toArray();
 
-        for (int i = 0; i < randomIndexes.length;i++) {
+        for (int i = 0; i < 1000000 ;i++) {
             int randomOne = random(totalRoom) - 1;
             int randomeTwo = random(totalRoom) - 1;
             int tmp = randomIndexes[randomOne];
@@ -211,16 +255,23 @@ public class ClientHandler extends Thread {
         ByteArrayInputStream bis = new ByteArrayInputStream(data);
         Workbook workbook = StreamingReader.builder()
                 .rowCacheSize(200000)
-                .bufferSize(1024*10)
+                .bufferSize(1024*5)
                 .open(bis);
+
         Sheet sheetOne = workbook.getSheetAt(0);
         for (Row row : sheetOne) {
             if (row.getRowNum() == HEADER_ROW) continue;
             double stt = row.getCell(EXAMINER_STT_COLUMN).getNumericCellValue();
             if (stt == 0) break;
+            String id = row.getCell(EXAMINER_ID_COLUMN).getStringCellValue();
             String name = row.getCell(EXAMINER_NAME_COLUMN).getStringCellValue();
-            String note = row.getCell(EXAMINER_NOTE_COLUMN).getStringCellValue();
-            examiners.add(new Examiner(name, note));
+            String birthDay = row.getCell(EXAMINER_BIRTHDAY_COLUMN).getStringCellValue();
+            String unit = row.getCell(EXAMINER_UNIT_COLUMN).getStringCellValue();
+            String note = "";
+            if (row.getCell(EXAMINER_NOTE_COLUMN) != null) {
+                note = row.getCell(EXAMINER_NOTE_COLUMN).getStringCellValue();
+            }
+            examiners.add(new Examiner(id,birthDay,unit,name,note));
         }
 
         Sheet sheetTwo = workbook.getSheetAt(1);
