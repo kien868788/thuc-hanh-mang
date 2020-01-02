@@ -11,6 +11,7 @@ public class Examiner {
     String unit;
     String name;
     String note;
+    String role;
 
     Room room;
 

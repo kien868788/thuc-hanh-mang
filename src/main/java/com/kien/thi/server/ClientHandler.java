@@ -5,6 +5,7 @@ import lombok.Data;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.net.Socket;
@@ -65,6 +66,11 @@ public class ClientHandler extends Thread {
             getData(bos.toByteArray());
             generateRandomIndexes();
             sortRoom();
+
+//             chia sheet
+//            byte[] response = generateExcelWithSheet(21);
+
+//             ko chia
             byte[] response = generateExcel();
 
             dos.writeInt(response.length);
@@ -118,6 +124,202 @@ public class ClientHandler extends Thread {
         }
 
         System.out.println("Done sorting room.");
+    }
+
+    private byte[] generateExcelWithSheet(int numberOfRow) {
+        Workbook workbook = new XSSFWorkbook();
+        int totalOfRow = examiners.size();
+        int step = 1;
+        boolean stop = false;
+        List<Examiner> queue = new ArrayList<>();
+        queue.addAll(examinerOnes);
+        queue.addAll(examinerTwos);
+        queue.addAll(outsides);
+        while (!stop) {
+            Sheet sheet = workbook.createSheet();
+            int stt = 1;
+            Row firstRow = sheet.createRow(0);
+
+            Cell firstCell = firstRow.createCell(3);
+            firstCell.setCellValue("  Cộng hòa xã hội chủ nghĩa Việt Nam " + "\n" +
+                    "    Độc Lập - Tự Do - Hạnh Phúc    " + "\n" +
+                    "DANH SÁCH PHÂN CÔNG COI THI"
+            );
+            sheet.addMergedRegion(new CellRangeAddress(0, 2, 3, 5));
+            int rowNumber = 5;
+            Row header = sheet.createRow(rowNumber++);
+            int headerColumnNumber = 0;
+            for (String str : Arrays.asList("STT", "Số thẻ", "Họ và tên", "Ngày sinh", "Đơn vị công tác", "Phòng thi", "Chức vụ", "Ghi chú")) {
+                Cell cell = header.createCell(headerColumnNumber++);
+                cell.setCellValue(str);
+            }
+
+            List<Examiner> examiners = new ArrayList<>();
+            for (int i = (step - 1) * numberOfRow; i < (step * numberOfRow) - 1; i++) {
+                if (i > queue.size() - 1) {
+                    continue;
+                }
+                examiners.add(queue.get(i));
+            }
+
+
+            for (Examiner examiner : examiners) {
+                Row row = sheet.createRow(rowNumber++);
+                int columnNumber = 0;
+
+                Cell sttCell = row.createCell(columnNumber++);
+                sttCell.setCellValue(stt++);
+
+                Cell idCell = row.createCell(columnNumber++);
+                idCell.setCellValue(examiner.getId());
+
+                Cell nameCell = row.createCell(columnNumber++);
+                nameCell.setCellValue(examiner.getName());
+
+                Cell birthDayCell = row.createCell(columnNumber++);
+                birthDayCell.setCellValue(examiner.getBirthDate());
+
+                Cell unitCell = row.createCell(columnNumber++);
+                unitCell.setCellValue(examiner.getUnit());
+
+                Cell roomCell = row.createCell(columnNumber++);
+                if (examiner.getRoom() != null) {
+                    roomCell.setCellValue(examiner.getRoom().getName());
+                }
+
+
+                Cell roleCell = row.createCell(columnNumber++);
+                roleCell.setCellValue(examiner.getRole());
+
+                Cell noteCell = row.createCell(columnNumber++);
+                noteCell.setCellValue(examiner.getNote());
+            }
+
+            if (step * numberOfRow > totalOfRow) {
+                stop = true;
+            }
+            step++;
+        }
+
+        // sheet tong hop
+//        Sheet sheet = workbook.createSheet();
+//        Row firstRow = sheet.createRow(0);
+//        int stt = 1;
+//
+//        Cell firstCell = firstRow.createCell(3);
+//        firstCell.setCellValue("  Cộng hòa xã hội chủ nghĩa Việt Nam " + "\n" +
+//                "    Độc Lập - Tự Do - Hạnh Phúc    " + "\n" +
+//                "DANH SÁCH PHÂN CÔNG COI THI"
+//        );
+//
+//        sheet.addMergedRegion(new CellRangeAddress(0, 2, 3, 5));
+//
+//
+//        int rowNumber = 5;
+//        Row header = sheet.createRow(rowNumber++);
+//        int headerColumnNumber = 0;
+//        for (String str : Arrays.asList("STT", "Số thẻ", "Họ và tên", "Ngày sinh", "Đơn vị công tác", "Phòng thi", "Chức vụ", "Ghi chú")) {
+//            Cell cell = header.createCell(headerColumnNumber++);
+//            cell.setCellValue(str);
+//        }
+//
+//
+//        for (Examiner examiner : examinerOnes) {
+//            Row row = sheet.createRow(rowNumber++);
+//            int columnNumber = 0;
+//
+//            Cell sttCell = row.createCell(columnNumber++);
+//            sttCell.setCellValue(stt++);
+//
+//            Cell idCell = row.createCell(columnNumber++);
+//            idCell.setCellValue(examiner.getId());
+//
+//            Cell nameCell = row.createCell(columnNumber++);
+//            nameCell.setCellValue(examiner.getName());
+//
+//            Cell birthDayCell = row.createCell(columnNumber++);
+//            birthDayCell.setCellValue(examiner.getBirthDate());
+//
+//            Cell unitCell = row.createCell(columnNumber++);
+//            unitCell.setCellValue(examiner.getUnit());
+//
+//            Cell roomCell = row.createCell(columnNumber++);
+//            roomCell.setCellValue(examiner.getRoom().getName());
+//
+//            Cell roleCell = row.createCell(columnNumber++);
+//            roleCell.setCellValue("Giám thị 1");
+//
+//            Cell noteCell = row.createCell(columnNumber++);
+//            noteCell.setCellValue(examiner.getNote());
+//        }
+//
+//        for (Examiner examiner : examinerTwos) {
+//            Row row = sheet.createRow(rowNumber++);
+//            int columnNumber = 0;
+//
+//            Cell sttCell = row.createCell(columnNumber++);
+//            sttCell.setCellValue(stt++);
+//
+//            Cell idCell = row.createCell(columnNumber++);
+//            idCell.setCellValue(examiner.getId());
+//
+//            Cell nameCell = row.createCell(columnNumber++);
+//            nameCell.setCellValue(examiner.getName());
+//
+//            Cell birthDayCell = row.createCell(columnNumber++);
+//            birthDayCell.setCellValue(examiner.getBirthDate());
+//
+//            Cell unitCell = row.createCell(columnNumber++);
+//            unitCell.setCellValue(examiner.getUnit());
+//
+//            Cell roomCell = row.createCell(columnNumber++);
+//            roomCell.setCellValue(examiner.getRoom().getName());
+//
+//
+//            Cell roleCell = row.createCell(columnNumber++);
+//            roleCell.setCellValue("Giám thị 2");
+//
+//            Cell noteCell = row.createCell(columnNumber++);
+//            noteCell.setCellValue(examiner.getNote());
+//        }
+//
+//        for (Examiner examiner: outsides) {
+//            Row row = sheet.createRow(rowNumber++);
+//            int columnNumber = 0;
+//            Cell sttCell = row.createCell(columnNumber++);
+//            sttCell.setCellValue(stt++);
+//
+//            Cell idCell = row.createCell(columnNumber++);
+//            idCell.setCellValue(examiner.getId());
+//
+//            Cell nameCell = row.createCell(columnNumber++);
+//            nameCell.setCellValue(examiner.getName());
+//
+//            Cell birthDayCell = row.createCell(columnNumber++);
+//            birthDayCell.setCellValue(examiner.getBirthDate());
+//
+//            Cell unitCell = row.createCell(columnNumber++);
+//            unitCell.setCellValue(examiner.getUnit());
+//
+//            Cell roomCell = row.createCell(columnNumber++);
+//            roomCell.setCellValue("");
+//
+//            Cell roleCell = row.createCell(columnNumber++);
+//            roleCell.setCellValue("Giám thị hành lang");
+//
+//            Cell noteCell = row.createCell(columnNumber++);
+//            noteCell.setCellValue(examiner.getNote());
+//        }
+
+
+        ByteArrayOutputStream byteArrayInputStream = new ByteArrayOutputStream();
+        try {
+            workbook.write(byteArrayInputStream);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        System.out.println("Done.");
+        return byteArrayInputStream.toByteArray();
     }
 
     private byte[] generateExcel() {
@@ -207,7 +409,6 @@ public class ClientHandler extends Thread {
         for (Examiner examiner: outsides) {
             Row row = sheet.createRow(rowNumber++);
             int columnNumber = 0;
-
             Cell sttCell = row.createCell(columnNumber++);
             sttCell.setCellValue(stt++);
 
@@ -314,15 +515,24 @@ public class ClientHandler extends Thread {
     }
 
     private boolean isExaminerOne(Examiner examiner) {
-        return examinerOnes.size() < totalRoom ? examinerOnes.add(examiner) : false;
+        boolean success = examinerOnes.size() < totalRoom ? examinerOnes.add(examiner) : false;
+        if (success) {
+            examiner.setRole("Giám thị 1");
+        }
+        return success;
     }
 
 
     private boolean isExaminerTwo(Examiner examiner) {
-        return examinerTwos.size() < totalRoom ? examinerTwos.add(examiner) : false;
+        boolean success = examinerTwos.size() < totalRoom ? examinerTwos.add(examiner) : false;
+        if (success) {
+            examiner.setRole("Giám thị 2");
+        }
+        return success;
     }
 
     private boolean isOutsideExaminer(Examiner examiner) {
+        examiner.setRole("Giám thị hành lang");
         return outsides.add(examiner);
     }
 
