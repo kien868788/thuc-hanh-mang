@@ -30,7 +30,7 @@ public class ClientGUI extends Application {
         super.init();
         fileChooser = new FileChooser();
         directoryChooser = new DirectoryChooser();
-        directoryChooser.setInitialDirectory(new File("/home/kien"));
+        directoryChooser.setInitialDirectory(new File("./"));
     }
 
     @Override

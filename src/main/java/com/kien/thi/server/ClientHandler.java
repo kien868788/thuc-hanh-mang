@@ -8,10 +8,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 
 @Data
@@ -31,6 +28,7 @@ public class ClientHandler extends Thread {
 
     List<Examiner> examiners;
     List<Room> rooms;
+    List<Room> outsideRooms;
     LinkedList<Examiner> examinerOnes;
     LinkedList<Examiner> examinerTwos;
     List<Examiner> outsides;
@@ -103,6 +101,22 @@ public class ClientHandler extends Thread {
                 examinerTwo.setRoom(room);
             }
         }
+
+        // sort room for outside examiner
+        int step = outsideRooms.size() / outsides.size();
+        int du = outsideRooms.size() % outsides.size();
+        for (int i = 0 ; i < outsides.size() ; i++) {
+            Room firstRoom = outsideRooms.get(i*step);
+            Room secondRoom;
+            if ((i + 1) * step > outsideRooms.size()) {
+                secondRoom = outsideRooms.get((i * step + du));
+            } else {
+                secondRoom = outsideRooms.get((i + 1) * step -1);
+            }
+            String note =  firstRoom.getName() + " - " + secondRoom.getName();
+            outsides.get(i).setNote(note);
+        }
+
         System.out.println("Done sorting room.");
     }
 
@@ -285,6 +299,7 @@ public class ClientHandler extends Thread {
             String name = row.getCell(ROOM_NAME_COLUMN).getStringCellValue();
             rooms.add(new Room(name));
         }
+        outsideRooms = new ArrayList<>(rooms);
         this.totalRoom = rooms.size();
         System.out.println("Done getting data.");
     }
